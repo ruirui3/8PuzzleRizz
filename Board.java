@@ -169,7 +169,11 @@ public class Board {
 
     // unit testing (not graded)
     public static void main(String[] args) {
-
+        Board board = new Board(new int[][] { { 1, 2, 3 }, { 4, 0, 6 }, { 7, 8, 5 } });
+        System.out.println(board.toString());
+        for (Board board1 : board.neighbors()) {
+            System.out.println(board1);
+        }
     }
 
 }
