@@ -30,7 +30,15 @@ public class Board {
 
     // string representation of this board
     public String toString() {
-        return "hi";
+        StringBuilder s = new StringBuilder();
+        s.append(boardLength + "\n");
+        for (int i = 0; i < boardLength; i++) {
+            for (int j = 0; j < boardLength; j++) {
+                s.append(String.format("%2d ", board[i][j]));
+            }
+            s.append("\n");
+        }
+        return s.toString();
     }
 
     // board dimension n
@@ -173,6 +181,8 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of tiles CHEESE: just swap
     // the origin with next element cuz 2x2 or higher
+
+    // NOTE probably need to do it for any specified element not sure...
     public Board twin() {
         int[][] copy = cloning(board);
 
@@ -186,7 +196,7 @@ public class Board {
 
     // unit testing (not graded)
     public static void main(String[] args) {
-        Board board = new Board(new int[][] { { 1, 2, 3 }, { 4, 0, 6 }, { 7, 8, 5 } });
+        Board board = new Board(new int[][] { { 4, 1, 2 }, { 3, 0, 6 }, { 5, 7, 8 } });
         System.out.println(board.toString());
         for (Board board1 : board.neighbors()) {
             System.out.println(board1);
