@@ -13,14 +13,14 @@ public class Board {
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
 
-        board = tiles.clone();
+        board = cloning(tiles);
 
         boardLength = tiles.length;
 
         complete = new int[boardLength][boardLength];
         int current = 1;
         for (int i = 0; i < boardLength; i++) {
-            for (int j = 0; i < boardLength; j++) {
+            for (int j = 0; j < boardLength; j++) {
                 complete[i][j] = current;
                 current++;
             }
@@ -60,22 +60,31 @@ public class Board {
 
         int man = 0;
 
-        int current = 1;
         for (int row = 0; row < boardLength; row++) {
             for (int col = 0; col < boardLength; col++) {
 
-                if (board[row][col] != 0) {
-                    int completeCol = 0;
-                    if (current % boardLength == 0) {
-                        completeCol = boardLength;
-                    } else {
-                        completeCol = current % boardLength;
-                    }
+                int tile = board[row][col];
 
-                    man += Math.abs((row + 1) - ((current / boardLength) + 1)) + Math.abs((col + 1) - completeCol); // check
-                                                                                                                    // if
-                                                                                                                    // right
-                }
+                int correctRow = (tile - 1) / boardLength;
+                int correctCol = (tile - 1) % boardLength;
+
+                man += Math.abs(row - correctRow) + Math.abs(col - correctCol);
+
+                /*
+                 * if (board[row][col] != 0) {
+                 * int completeCol = 0;
+                 * if (current % boardLength == 0) {
+                 * completeCol = boardLength;
+                 * } else {
+                 * completeCol = current % boardLength;
+                 * }
+                 * 
+                 * man += Math.abs((row + 1) - ((current / boardLength) + 1)) + Math.abs((col +
+                 * 1) - completeCol); // check
+                 * // if
+                 * // right
+                 * }
+                 */
 
             }
         }
@@ -102,7 +111,7 @@ public class Board {
             return false;
         }
         Board that = (Board) y;
-        return Arrays.deepEquals(this.board, that.board); // this might not work? FAQ says if a and b are type int[]
+        return Arrays.deepEquals(this.board, that.board);
     }
 
     // all neighboring boards
@@ -136,11 +145,19 @@ public class Board {
 
     public int[][] swapIndex(int row1, int col1, int row2, int col2) {
 
-        int[][] copy = board.clone();
+        int[][] copy = cloning(board);
         copy[row1][col1] = board[row2][col2];
-        copy[row2][col2] = board[row1][row2];
+        copy[row2][col2] = board[row1][col1];
         return copy;
 
+    }
+
+    private int[][] cloning(int[][] original) {
+        int[][] copy = new int[original.length][original[0].length];
+        for (int i = 0; i < original.length; i++) {
+            copy[i] = original[i].clone();
+        }
+        return copy;
     }
 
     private int findIndexBlank() {
@@ -157,7 +174,7 @@ public class Board {
     // a board that is obtained by exchanging any pair of tiles CHEESE: just swap
     // the origin with next element cuz 2x2 or higher
     public Board twin() {
-        int[][] copy = board.clone();
+        int[][] copy = cloning(board);
 
         if (copy[0][0] != 0 && copy[0][1] != 0) {
             return new Board(swapIndex(0, 0, 0, 1));
