@@ -1,161 +1,95 @@
-
-//maybe since each number is 1 greater than index, can make a 
-//conversion method. AKA CHANGE int[][] finishedTiles at some point
-
 import java.util.Arrays;
-
-/**
- * Hammering calculation: number of elements in their INCORRECT position
- * Manhatton calculation: the sum of distance (moves one element per shift, no
- * diagonal) to the correct position
- * priority calculation: the sum of hammering and manhatton. the lower prio, the
- * better
- * 
- * 
- * Board prio works like
- */
+import java.util.Stack;
 
 public class Board {
 
-    private Node[] board;
-    private int bLength;
-    private int boardSize;
-    private Node[] complete;
+    private int[][] board;
 
-    private static class Node {
-        private int row;
-        private int col;
-        private int value;
+    private int boardLength;
 
-    }
+    private int[][] complete;
 
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
-    // 1 2 3
-    // 4 5 6
-    // 7 8 9
-    // = 123456789
     public Board(int[][] tiles) {
 
-        bLength = tiles.length;
-        board = new Node[bLength * bLength];
-        boardSize = bLength * bLength;
-        int cur = 0;
-        for (int i = 0; i < bLength; i++) {
-            for (int j = 0; j < bLength; j++) {
+        board = tiles.clone();
 
-                board[cur].value = tiles[i][j];
-                board[cur].row = i + 1;
-                board[cur].col = j + 1;
+        boardLength = tiles.length;
 
-                cur++;
+        complete = new int[boardLength][boardLength];
+        int current = 1;
+        for (int i = 0; i < boardLength; i++) {
+            for (int j = 0; i < boardLength; j++) {
+                complete[i][j] = current;
+                current++;
             }
         }
-
-        // makes copy of complete board
-        for (int i = 1; i < boardSize; i++) {
-            complete[i].value = i;
-            complete[i].row = (i / bLength) + 1;
-            if (i % bLength == 0) {
-                complete[i].col = bLength;
-            } else {
-                complete[i].col = i % bLength;
-            }
-
-        }
-        complete[boardSize - 1].value = 0;
-        complete[boardSize - 1].row = bLength;
-        complete[boardSize - 1].col = bLength;
-
+        complete[boardLength - 1][boardLength - 1] = 0;
     }
 
     // string representation of this board
-    public String toString() { // convert to legible form
-        StringBuilder s = new StringBuilder();
-        s.append(n + "\n");
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                s.append(String.format("%2d ", tiles[i][j]));
-            }
-            s.append("\n");
-        }
-        return s.toString();
+    public String toString() {
+        return "hi";
     }
 
     // board dimension n
     public int dimension() {
-        return bLength * 2;
+        return boardLength;
     }
 
     // number of tiles out of place
-    // FINISHED
     public int hamming() {
-        int rightIndex = 1;
-        int ham = 0;
-        for (int i = 0; i < dimension() - 1; i++) {
-            if (board[i].value != rightIndex) {
-                ham++;
-            }
-            rightIndex++;
-        }
 
+        int ham = 0;
+        for (int i = 0; i < boardLength; i++) {
+            for (int j = 0; j < boardLength; j++) {
+
+                if (board[i][j] != 0 && board[i][j] != complete[i][j]) {
+                    ham++;
+                }
+
+            }
+        }
         return ham;
 
-        // use this if hammer counts last item
-        /*
-         * if (board[dimension()-1].value == 0) {
-         * return ham;
-         * }
-         * return ham+1;
-         */
     }
 
     // sum of Manhattan distances between tiles and goal
-    // use Math.abs()
     public int manhattan() {
+
         int man = 0;
 
-        for (int i = 0; i < boardSize; i++) {
-            man += Math.abs(board[i].row - complete[i].row) + Math.abs(board[i].col - complete[i].col);
+        int current = 1;
+        for (int row = 0; row < boardLength; row++) {
+            for (int col = 0; col < boardLength; col++) {
+
+                if (board[row][col] != 0) {
+                    int completeCol = 0;
+                    if (current % boardLength == 0) {
+                        completeCol = boardLength;
+                    } else {
+                        completeCol = current % boardLength;
+                    }
+
+                    man += Math.abs((row + 1) - ((current / boardLength) + 1)) + Math.abs((col + 1) - completeCol); // check
+                                                                                                                    // if
+                                                                                                                    // right
+                }
+
+            }
         }
         return man;
 
     }
 
-    /**
-     * 1 2 3
-     * 4 5 6
-     * 7 8 0
-     * 
-     * @param row
-     * @param col
-     * @return
-     */
-
-    // returns index in Node[] board at given row and col with bound consideration
-    // like (1,1) as origin (refer to onenote)
-    private int getIndex(int row, int col) {
-        return (row - 1) * bLength + col - 1;
-    }
-
     // is this board the goal board?
     public boolean isGoal() {
-
-        int correctVal = 1;
-        for (int i = 0; i < (bLength * bLength) - 1; i++) {
-            if (board[i].value != correctVal) {
-                return false;
-            }
-            correctVal++;
-        }
-        if (board[(bLength * bLength) - 1].value != 0) {
-            return false;
-        }
-        return true;
+        return hamming() == 0;
     }
 
     @Override
-    // does this board equal y? implement comparison equal method
+    // does this board equal y?
     public boolean equals(Object y) {
         // look at Date.java
         if (this == y) {
@@ -173,11 +107,63 @@ public class Board {
 
     // all neighboring boards
     public Iterable<Board> neighbors() {
+        Stack<Board> neighborsStack = new Stack<>();
+        int indexBlank = findIndexBlank();
+        int row = indexBlank / boardLength;
+        int col = indexBlank % boardLength;
+        // check if top exist, push swap betw blank and up
+        if (row > 0) {
+            neighborsStack.push(new Board(swapIndex(row, col, row - 1, col)));
+        }
+
+        // check if bot exist, push swap betw blank and up
+        if (row < boardLength - 1) {
+            neighborsStack.push(new Board(swapIndex(row, col, row + 1, col)));
+        }
+
+        // if there is something left, push swap betw blank and left
+        if (col > 0) {
+            neighborsStack.push(new Board(swapIndex(row, col, row, col - 1)));
+        }
+
+        // check if right exist, push swap betw blank and right
+        if (col < boardLength - 1) {
+            neighborsStack.push(new Board(swapIndex(row, col, row, col + 1)));
+        }
+
+        return neighborsStack;
+    }
+
+    public int[][] swapIndex(int row1, int col1, int row2, int col2) {
+
+        int[][] copy = board.clone();
+        copy[row1][col1] = board[row2][col2];
+        copy[row2][col2] = board[row1][row2];
+        return copy;
 
     }
 
-    // a board that is obtained by exchanging any pair of tiles
+    private int findIndexBlank() {
+        for (int i = 0; i < boardLength; i++) {
+            for (int j = 0; j < boardLength; j++) {
+                if (board[i][j] == 0) {
+                    return j + i * boardLength;
+                }
+            }
+        }
+        return -1;
+    }
+
+    // a board that is obtained by exchanging any pair of tiles CHEESE: just swap
+    // the origin with next element cuz 2x2 or higher
     public Board twin() {
+        int[][] copy = board.clone();
+
+        if (copy[0][0] != 0 && copy[0][1] != 0) {
+            return new Board(swapIndex(0, 0, 0, 1));
+        } else {
+            return new Board(swapIndex(1, 0, 1, 1));
+        }
 
     }
 
