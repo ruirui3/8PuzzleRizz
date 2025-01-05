@@ -7,8 +7,6 @@ public class Board {
 
     private int boardLength;
 
-    private int[][] complete;
-
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
@@ -17,15 +15,6 @@ public class Board {
 
         boardLength = tiles.length;
 
-        complete = new int[boardLength][boardLength];
-        int current = 1;
-        for (int i = 0; i < boardLength; i++) {
-            for (int j = 0; j < boardLength; j++) {
-                complete[i][j] = current;
-                current++;
-            }
-        }
-        complete[boardLength - 1][boardLength - 1] = 0;
     }
 
     // string representation of this board
@@ -53,7 +42,19 @@ public class Board {
         for (int i = 0; i < boardLength; i++) {
             for (int j = 0; j < boardLength; j++) {
 
-                if (board[i][j] != 0 && board[i][j] != complete[i][j]) {
+                // calculates the complete board equivilantcy
+
+                /*
+                 * 0 1 2
+                 * 
+                 * 0 1 2 3
+                 * 1 4 5 6
+                 * 2 7 8 9
+                 * 
+                 * do +1 becuase not 123/456/780 form
+                 */
+
+                if (board[i][j] != 0 && board[i][j] != ((i * boardLength + j + 1))) {
                     ham++;
                 }
 
@@ -73,10 +74,13 @@ public class Board {
 
                 int tile = board[row][col];
 
-                int correctRow = (tile - 1) / boardLength;
-                int correctCol = (tile - 1) % boardLength;
+                if (tile != 0) {
+                    // -1 because not in form of 012/345/678
+                    int correctRow = (tile - 1) / boardLength;
+                    int correctCol = (tile - 1) % boardLength;
 
-                man += Math.abs(row - correctRow) + Math.abs(col - correctCol);
+                    man += Math.abs(row - correctRow) + Math.abs(col - correctCol);
+                }
 
                 /*
                  * if (board[row][col] != 0) {
@@ -112,13 +116,11 @@ public class Board {
         if (this == y) {
             return true;
         }
-        if (y == null) {
-            return false;
-        }
-        if (y.getClass() != this.getClass()) {
+        if (y == null || y.getClass() != this.getClass()) {
             return false;
         }
         Board that = (Board) y;
+
         return Arrays.deepEquals(this.board, that.board);
     }
 
@@ -151,7 +153,7 @@ public class Board {
         return neighborsStack;
     }
 
-    public int[][] swapIndex(int row1, int col1, int row2, int col2) {
+    private int[][] swapIndex(int row1, int col1, int row2, int col2) {
 
         int[][] copy = cloning(board);
         copy[row1][col1] = board[row2][col2];
@@ -196,11 +198,7 @@ public class Board {
 
     // unit testing (not graded)
     public static void main(String[] args) {
-        Board board = new Board(new int[][] { { 4, 1, 2 }, { 3, 0, 6 }, { 5, 7, 8 } });
-        System.out.println(board.toString());
-        for (Board board1 : board.neighbors()) {
-            System.out.println(board1);
-        }
+
     }
 
 }

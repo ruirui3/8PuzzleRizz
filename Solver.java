@@ -96,15 +96,17 @@ public class Solver {
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
-        if (isSolvable()) {
-            SearchNode last = solutionLast;
 
-            Stack<Board> stack = new Stack<Board>();
+        SearchNode last = solutionLast;
+
+        Stack<Board> stack = new Stack<Board>();
+        if (isSolvable()) {
 
             while (last.getPrev() != null) {
                 stack.push(last.initialBoard);
                 last = last.getPrev();
             }
+            stack.push(last.initialBoard);
             return stack;
         } else {
             return null;
