@@ -1,4 +1,9 @@
+import java.util.Queue;
+
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
+import edu.princeton.cs.algs4.Stack;
+import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
 
@@ -9,6 +14,10 @@ public class Solver {
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
+
+        if (initial == null) {
+            throw new IllegalArgumentException("womp womp");
+        }
 
         moves = 0;
         int twinMoves = 0;
@@ -25,35 +34,34 @@ public class Solver {
         twinPQ.insert(twin);
 
         // maybe change to isGoal
-        boolean finished = main.copyBoard().isGoal();
-        boolean twinFinished = twin.copyBoard().isGoal();
 
         // need this for end code
-        SearchNode current = null;
+        SearchNode current = mainPQ.delMin();
+        SearchNode currentTwin = twinPQ.delMin();
 
-        while (!finished && !twinFinished) {
+        // end only after 1 of the isFinished is finished
+        while (!current.initialBoard.isGoal() && !currentTwin.initialBoard.isGoal()) {
 
-            current = mainPQ.delMin();
-            SearchNode currentTwin = twinPQ.delMin();
             SearchNode mainPrev = current.getPrev();
             SearchNode twinPrev = currentTwin.getPrev();
-            Board tempBoard = current.copyBoard();
-            Board twinTempBoard = currentTwin.copyBoard();
 
             // enqueue neighbors
             for (Board board : current.initialBoard.neighbors()) {
                 // optimzation
-                if (mainPrev == null || board.equals(mainPrev.initialBoard)) {
+                if (mainPrev == null || !board.equals(mainPrev.initialBoard)) {
                     mainPQ.insert(new SearchNode(board, (current.getMoves() + 1), current));
                 }
             }
 
             for (Board board : currentTwin.initialBoard.neighbors()) {
                 // optimzation
-                if (twinPrev == null || board.equals(twinPrev.initialBoard)) {
+                if (twinPrev == null || !board.equals(twinPrev.initialBoard)) {
                     twinPQ.insert(new SearchNode(board, (currentTwin.getMoves() + 1), currentTwin));
                 }
             }
+
+            current = mainPQ.delMin();
+            currentTwin = twinPQ.delMin();
 
             // note: from FAQ, prio of search node dequed from prio queue never decrease
 
@@ -62,13 +70,13 @@ public class Solver {
         // one will reach the end. if it isn't main, then main is not solvable. this is
         // because one will go on infinitely while one will eventually finish
 
-        if (current.copyBoard().isGoal()) {
+        if (current.initialBoard.isGoal()) {
             solvable = true;
+            moves = current.getMoves();
+            solutionLast = current;
         } else {
             solvable = false;
         }
-        moves = current.getMoves();
-        solutionLast = current;
 
     }
 
@@ -79,17 +87,25 @@ public class Solver {
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        return moves;
+
+        if (solvable) {
+            return moves;
+        }
+        return -1;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
         if (isSolvable()) {
-            SearchNode lastPrev = solutionLast.getPrev();
-            while (lastPrev != null) {
+            SearchNode last = solutionLast;
 
+            Stack<Board> stack = new Stack<Board>();
+
+            while (last.getPrev() != null) {
+                stack.push(last.initialBoard);
+                last = last.getPrev();
             }
-
+            return stack;
         } else {
             return null;
         }
@@ -97,6 +113,27 @@ public class Solver {
 
     // test client (see below)
     public static void main(String[] args) {
+
+        // create initial board from file
+        In in = new In(args[0]);
+        int n = in.readInt();
+        int[][] tiles = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                tiles[i][j] = in.readInt();
+        Board initial = new Board(tiles);
+
+        // solve the puzzle
+        Solver solver = new Solver(initial);
+
+        // print solution to standard output
+        if (!solver.isSolvable())
+            StdOut.println("No solution possible");
+        else {
+            StdOut.println("Minimum number of moves = " + solver.moves());
+            for (Board board : solver.solution())
+                StdOut.println(board);
+        }
 
     }
 
@@ -139,13 +176,13 @@ public class Solver {
         private SearchNode previous;
         private Board initialBoard;
         private int moves = 0;
-        private int prio;
+        private int man;
 
         public SearchNode(Board init, int mov, SearchNode prev) {
             previous = prev;
             initialBoard = init;
             moves = mov;
-            prio = initialBoard.manhattan() + moves;
+            man = init.manhattan();
         }
 
         @Deprecated
@@ -154,7 +191,7 @@ public class Solver {
         }
 
         public int getPrio() {
-            return prio;
+            return man + moves;
         }
 
         @Override
@@ -166,6 +203,7 @@ public class Solver {
             return previous;
         }
 
+        // Not useful since no mutation in boards or SearchNode
         public Board copyBoard() {
             Board temp = initialBoard;
             return temp;
