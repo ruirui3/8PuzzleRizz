@@ -1,4 +1,14 @@
-import java.util.Queue;
+/**
+ * @author Rui Zhao attests that this code is their original work and was written in compliance with the class Academic Integrity and Collaboration Policy found in the syllabus. 
+ */
+
+/*
+ * Personally I believe the Solver was much harder than Board.java. The hardest part of the start up on how to approach the solver. 
+ * Despite knowing how to do it, execution is hard. I found myself reading the specs over and over again. Below you can see my notes
+ * detailing everything regarding the Solver.java and how I came to realize how the code works. I have remembered Node class from back in the 
+ * Stacks and Deque whatever unit I think? I employed that logic here to simplify the process along with aligning it with the specifications and FAQ. 
+ * For the solver method, I thought it was very hard but all you needed to do is look at the Game Tree from specs and check for cases for optimization and detecting dupes. 
+ */
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;

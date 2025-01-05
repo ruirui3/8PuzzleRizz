@@ -1,3 +1,14 @@
+/**
+ * @author Rui Zhao attests that this code is their original work and was written in compliance with the class Academic Integrity and Collaboration Policy found in the syllabus. 
+ */
+
+/*
+ * I believe the hardest part about Board.java was the math. Everything is easy after you draw out pictures of either 123/456/780 or manhattans. The hard part was the math which is trying to figure out 
+ how to fetch certain indexes and also fetching the rows and columns since corner case is (1,1) origin. Basically trying to manuver between using (0,0) index form and (1,1) corner case form was the hardest. 
+ Neighboring isn't so bad after you figure out all you need to do is enqueue the approapriate north south west east direction swaps. For other cases like cloning and equals, the FAQ helped a lot (basically giving me the answers)
+ Also another thing to mention was I abandoned my previous board (labeled Board3.java currently) because I thought 1D was too much of a hassle. This could be much more optimized with 1D or char[].  
+ */
+
 import java.util.Arrays;
 import java.util.Stack;
 
